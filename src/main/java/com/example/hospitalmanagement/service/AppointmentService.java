@@ -16,4 +16,7 @@ public interface AppointmentService {
                                                 AppointmentStatusRequest request);
     // Admin/Doctor xem tất cả lịch
     Page<AppointmentResponse> getAllAppointments(Appointment.AppointmentStatus status, int page, int size);
+
+    Page<AppointmentResponse> getDoctorAppointments(String username,
+                                                    Appointment.AppointmentStatus status, int page, int size);
 }

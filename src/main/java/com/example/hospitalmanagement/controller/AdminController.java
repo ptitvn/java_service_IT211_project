@@ -43,7 +43,7 @@ public class AdminController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         Page<UserResponse> users = userService.searchUsers(keyword, role, page, size);
-        return ResponseEntity.ok(ApiResponse.success("Users retrieved successfully", users));
+        return ResponseEntity.ok(ApiResponse.success("Người dùng đã được lấy thành công", users));
     }
 
     //  FR-05: Lấy chi tiết 1 user
@@ -96,6 +96,6 @@ public class AdminController {
             @Valid @RequestBody ResetPasswordRequest request) {
         userService.resetPassword(id, request);
         return ResponseEntity.ok(ApiResponse.success(
-                "Password reset successfully for user id: " + id));
+                "Đặt lại mật khẩu thành công cho ID người dùng: " + id));
     }
 }

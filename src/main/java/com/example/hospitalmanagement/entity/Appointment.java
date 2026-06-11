@@ -5,10 +5,7 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
-/**
- * UC-04: Thực thể lịch khám bệnh
- * State machine: PENDING → APPROVED / REJECTED → CANCELLED
- */
+
 @Entity
 @Table(name = "appointments")
 @Getter

@@ -8,7 +8,7 @@ import lombok.Data;
 @Data
 public class ResetPasswordRequest {
 
-    @NotBlank(message = "New password is required")
-    @Size(min = 6, message = "Password must be at least 6 characters")
+    @NotBlank(message = "Cần có mật khẩu mới")
+    @Size(min = 6, message = "Mật khẩu phải có ít nhất 6 ký tự")
     private String newPassword;
 }

@@ -13,10 +13,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/**
- * Các API dùng chung cho tất cả role đã đăng nhập.
- * FR-10: Đổi mật khẩu
- */
 @RestController
 @RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
@@ -25,32 +21,21 @@ public class UserController {
     private final UserService userService;
     private final MedicalRecordService medicalRecordService;
 
-    // ─── FR-10: Đổi mật khẩu ──────────────────────────────────────────────────
-
-    /**
-     * POST /api/v1/users/change-password
-     * Header: Authorization: Bearer <token>
-     * Body: { "currentPassword": "...", "newPassword": "...", "confirmPassword": "..." }
-     */
+    //  FR-10: Đổi mật khẩu
     @PostMapping("/change-password")
     public ResponseEntity<ApiResponse<Void>> changePassword(
             @Valid @RequestBody ChangePasswordRequest request,
             Authentication authentication) {
         userService.changePassword(authentication.getName(), request);
-        return ResponseEntity.ok(ApiResponse.success("Password changed successfully"));
+        return ResponseEntity.ok(ApiResponse.success("Đổi mật khẩu thành công"));
     }
 
-    // ─── Bệnh nhân xem hồ sơ của mình ────────────────────────────────────────
-
-    /**
-     * GET /api/v1/users/records
-     * Header: Authorization: Bearer <patient_token>
-     */
+    //  Bệnh nhân xem hồ sơ của mình
     @GetMapping("/records")
     public ResponseEntity<ApiResponse<List<MedicalRecordResponse>>> getMyRecords(
             Authentication authentication) {
         List<MedicalRecordResponse> records = medicalRecordService
                 .getMyRecords(authentication.getName());
-        return ResponseEntity.ok(ApiResponse.success("Records retrieved successfully", records));
+        return ResponseEntity.ok(ApiResponse.success("Đã lấy dữ liệu thành công", records));
     }
 }

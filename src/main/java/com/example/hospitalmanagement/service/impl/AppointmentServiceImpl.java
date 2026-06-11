@@ -30,8 +30,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final AppointmentRepository appointmentRepository;
     private final UserRepository userRepository;
 
-    //  FR-06: Đặt lịch khám
-
+    // FR-06: Đặt lịch khám
     @Override
     @Transactional
     public AppointmentResponse createAppointment(String username, AppointmentRequest request) {
@@ -67,17 +66,15 @@ public class AppointmentServiceImpl implements AppointmentService {
         return AppointmentResponse.fromEntity(saved);
     }
 
-    // FR-07: Xem lịch sử khám cá nhân
-
+    // FR-07: Xem lịch sử khám cá nhân (Patient)
     @Override
     @Transactional(readOnly = true)
     public Page<AppointmentResponse> getMyAppointments(String username, int page, int size) {
         User patient = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException("Patient not found"));
 
-        PageRequest pageable = PageRequest.of(page, size);
+        PageRequest pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
 
-        // Dùng JOIN FETCH để load patient + doctor trong 1 query, tránh LazyInitializationException
         Page<Appointment> appointments = appointmentRepository
                 .findByPatientWithDetails(patient, pageable);
 
@@ -89,13 +86,11 @@ public class AppointmentServiceImpl implements AppointmentService {
         return new PageImpl<>(dtoList, pageable, appointments.getTotalElements());
     }
 
-    //  FR-08: Phê duyệt / Từ chối lịch khám
-
+    // FR-08: Phê duyệt / Từ chối lịch khám
     @Override
     @Transactional
     public AppointmentResponse updateAppointmentStatus(Long appointmentId, String username,
                                                        AppointmentStatusRequest request) {
-        // Load appointment kèm patient và doctor
         Appointment appointment = appointmentRepository.findById(appointmentId)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Không tìm thấy cuộc hẹn với id: " + appointmentId));
@@ -107,7 +102,7 @@ public class AppointmentServiceImpl implements AppointmentService {
 
         if (request.getStatus() == Appointment.AppointmentStatus.PENDING ||
                 request.getStatus() == Appointment.AppointmentStatus.CANCELLED) {
-            throw new BadRequestException("Trạng thái phải là APPROVED  hoặc REJECTED");
+            throw new BadRequestException("Trạng thái phải là APPROVED hoặc REJECTED");
         }
 
         appointment.setStatus(request.getStatus());
@@ -117,7 +112,7 @@ public class AppointmentServiceImpl implements AppointmentService {
 
         Appointment updated = appointmentRepository.save(appointment);
 
-        // Load lại với JOIN FETCH để tránh Lazy
+        // Load lại để tránh LazyInitializationException
         User patient = userRepository.findById(updated.getPatient().getId()).orElseThrow();
         User doctor = userRepository.findById(updated.getDoctor().getId()).orElseThrow();
         updated.setPatient(patient);
@@ -129,8 +124,29 @@ public class AppointmentServiceImpl implements AppointmentService {
         return AppointmentResponse.fromEntity(updated);
     }
 
-    //  Admin xem tất cả lịch khám
+    // FR-08: Doctor xem lịch khám của mình (filter theo status)
+    @Override
+    @Transactional(readOnly = true)
+    public Page<AppointmentResponse> getDoctorAppointments(String username,
+                                                           Appointment.AppointmentStatus status, int page, int size) {
 
+        User doctor = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("Doctor not found"));
+
+        PageRequest pageable = PageRequest.of(page, size, Sort.by("appointmentTime").ascending());
+
+        Page<Appointment> appointments = appointmentRepository
+                .findByDoctorWithDetails(doctor, status, pageable);
+
+        List<AppointmentResponse> dtoList = appointments.getContent()
+                .stream()
+                .map(AppointmentResponse::fromEntity)
+                .toList();
+
+        return new PageImpl<>(dtoList, pageable, appointments.getTotalElements());
+    }
+
+    // Admin xem tất cả lịch khám
     @Override
     @Transactional(readOnly = true)
     public Page<AppointmentResponse> getAllAppointments(Appointment.AppointmentStatus status,

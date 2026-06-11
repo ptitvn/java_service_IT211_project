@@ -18,7 +18,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
-
 @RestController
 @RequestMapping("/api/v1/doctor")
 @RequiredArgsConstructor
@@ -27,25 +26,28 @@ public class DoctorController {
     private final AppointmentService appointmentService;
     private final MedicalRecordService medicalRecordService;
 
-    //  FR-08: Xem lịch khám
+    // FR-08: Xem lịch khám
     @GetMapping("/appointments")
     public ResponseEntity<ApiResponse<Page<AppointmentResponse>>> getAppointments(
             @RequestParam(required = false) Appointment.AppointmentStatus status,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(defaultValue = "10") int size,
+            Authentication authentication) {
         return ResponseEntity.ok(ApiResponse.success("Success",
-                appointmentService.getAllAppointments(status, page, size)));
+                appointmentService.getDoctorAppointments(
+                        authentication.getName(), status, page, size)));
     }
 
-    //  FR-08: Phê duyệt / Từ chối
+    // FR-08: Phê duyệt / Từ chối lịch khám
     @PutMapping("/appointments/{id}/status")
     public ResponseEntity<ApiResponse<AppointmentResponse>> updateStatus(
             @PathVariable Long id,
             @Valid @RequestBody AppointmentStatusRequest request,
             Authentication authentication) {
         return ResponseEntity.ok(ApiResponse.success(
-                "Appointment status updated successfully",
-                appointmentService.updateAppointmentStatus(id, authentication.getName(), request)));
+                "Tình trạng cuộc hẹn đã được cập nhật thành công",
+                appointmentService.updateAppointmentStatus(
+                        id, authentication.getName(), request)));
     }
 
     // FR-09: Tải lên hồ sơ bệnh án
@@ -60,14 +62,17 @@ public class DoctorController {
         MedicalRecordResponse response = medicalRecordService.uploadRecord(
                 authentication.getName(), appointmentId, file, diagnosis, description);
 
-        return ResponseEntity.ok(ApiResponse.success("Medical record uploaded successfully", response));
+        return ResponseEntity.ok(ApiResponse.success(
+                "Hồ sơ y tế đã được tải lên thành công", response));
     }
 
-    //  Xem hồ sơ bệnh án đã tải lên
+    // Xem danh sách hồ sơ bệnh án đã tải lên
     @GetMapping("/records")
     public ResponseEntity<ApiResponse<List<MedicalRecordResponse>>> getMyRecords(
             Authentication authentication) {
-        List<MedicalRecordResponse> records = medicalRecordService.getMyRecords(authentication.getName());
-        return ResponseEntity.ok(ApiResponse.success("Records retrieved successfully", records));
+        List<MedicalRecordResponse> records =
+                medicalRecordService.getMyRecords(authentication.getName());
+        return ResponseEntity.ok(ApiResponse.success(
+                "Đã lấy bản ghi thành công", records));
     }
 }

@@ -50,7 +50,7 @@ class AuthServiceTest {
         ReflectionTestUtils.setField(authService, "refreshTokenExpiration", 604800000L);
     }
 
-    // ─── Test 1: Login thành công ──────────────────────────────────────────────
+    // Test 1: Login thành công
 
     @Test
     @DisplayName("Test 1 - Login với đúng username/password trả về token")
@@ -83,7 +83,7 @@ class AuthServiceTest {
         verify(authenticationManager, times(1)).authenticate(any());
     }
 
-    // ─── Test 2: Login sai mật khẩu ───────────────────────────────────────────
+    //  Test 2: Login sai mật khẩu
 
     @Test
     @DisplayName("Test 2 - Login sai mật khẩu ném BadCredentialsException")
@@ -102,8 +102,7 @@ class AuthServiceTest {
                 .hasMessage("Bad credentials");
     }
 
-    // ─── Test 3: Register thành công ──────────────────────────────────────────
-
+    //  Test 3: Register thành công
     @Test
     @DisplayName("Test 3 - Register bệnh nhân mới thành công")
     void register_newUser_returnsAuthResponse() {
@@ -138,7 +137,7 @@ class AuthServiceTest {
         verify(userRepository, times(1)).save(any());
     }
 
-    // ─── Test 4: Register trùng username ──────────────────────────────────────
+    //  Test 4: Register trùng username
 
     @Test
     @DisplayName("Test 4 - Register trùng username ném ConflictException")
@@ -160,7 +159,7 @@ class AuthServiceTest {
         verify(userRepository, never()).save(any());
     }
 
-    // ─── Test 5: Register trùng email ─────────────────────────────────────────
+    //  Test 5: Register trùng email
 
     @Test
     @DisplayName("Test 5 - Register trùng email ném ConflictException")

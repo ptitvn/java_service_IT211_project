@@ -14,17 +14,23 @@ import java.time.LocalDateTime;
 @Repository
 public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
 
-    // FR-07: Lịch sử khám của bệnh nhân - dùng JOIN FETCH để load patient+doctor cùng lúc
+    // FR-07: Lịch sử khám của bệnh nhân
     @Query("SELECT a FROM Appointment a JOIN FETCH a.patient JOIN FETCH a.doctor " +
             "WHERE a.patient = :patient ORDER BY a.createdAt DESC")
-    Page<Appointment> findByPatientWithDetails(@Param("patient") User patient, Pageable pageable);
+    Page<Appointment> findByPatientWithDetails(
+            @Param("patient") User patient, Pageable pageable);
 
-    // FR-08: Danh sách lịch của bác sĩ - JOIN FETCH
+    // FR-08: Lịch của bác sĩ - filter theo status
     @Query("SELECT a FROM Appointment a JOIN FETCH a.patient JOIN FETCH a.doctor " +
-            "WHERE a.doctor = :doctor ORDER BY a.appointmentTime ASC")
-    Page<Appointment> findByDoctorWithDetails(@Param("doctor") User doctor, Pageable pageable);
+            "WHERE a.doctor = :doctor " +
+            "AND (:status IS NULL OR a.status = :status) " +
+            "ORDER BY a.appointmentTime ASC")
+    Page<Appointment> findByDoctorWithDetails(
+            @Param("doctor") User doctor,
+            @Param("status") Appointment.AppointmentStatus status,
+            Pageable pageable);
 
-    // Kiểm tra trùng lịch bác sĩ (UC-04)
+    // UC-04: Kiểm tra trùng lịch bác sĩ
     @Query("SELECT COUNT(a) > 0 FROM Appointment a WHERE a.doctor = :doctor " +
             "AND a.appointmentTime = :time " +
             "AND a.status IN ('PENDING', 'APPROVED')")
@@ -32,7 +38,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
             @Param("doctor") User doctor,
             @Param("time") LocalDateTime time);
 
-    // Admin xem tất cả lịch - JOIN FETCH
+    // Admin xem tất cả lịch
     @Query("SELECT a FROM Appointment a JOIN FETCH a.patient JOIN FETCH a.doctor " +
             "WHERE (:status IS NULL OR a.status = :status) ORDER BY a.createdAt DESC")
     Page<Appointment> findAllWithDetails(

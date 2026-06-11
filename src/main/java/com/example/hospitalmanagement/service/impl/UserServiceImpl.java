@@ -94,11 +94,14 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
         if (user.getRole() == User.Role.ADMIN)
             throw new BadRequestException("Cannot delete admin account");
-        userRepository.deleteById(id);
+
+//        userRepository.deleteById(id);
+        user.setStatus(User.UserStatus.INACTIVE);
+        userRepository.save(user);
         log.info("[USER] Deleted user id: {}", id);
     }
 
-    // ─── FR-10: Người dùng tự đổi mật khẩu ───────────────────────────────────
+    // FR-10: Người dùng tự đổi mật khẩu
 
     @Override
     @Transactional
@@ -120,7 +123,7 @@ public class UserServiceImpl implements UserService {
         log.info("[USER] Password changed for: '{}'", username);
     }
 
-    // ─── FR-10: Admin reset mật khẩu hộ ──────────────────────────────────────
+    //  FR-10: Admin reset mật khẩu hộ
 
     @Override
     @Transactional
