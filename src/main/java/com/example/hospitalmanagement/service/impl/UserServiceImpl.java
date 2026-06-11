@@ -2,6 +2,7 @@ package com.example.hospitalmanagement.service.impl;
 
 import com.example.hospitalmanagement.dto.request.ChangePasswordRequest;
 import com.example.hospitalmanagement.dto.request.CreateUserRequest;
+import com.example.hospitalmanagement.dto.request.ResetPasswordRequest;
 import com.example.hospitalmanagement.dto.request.UpdateUserRequest;
 import com.example.hospitalmanagement.dto.response.UserResponse;
 import com.example.hospitalmanagement.entity.User;
@@ -97,7 +98,7 @@ public class UserServiceImpl implements UserService {
         log.info("[USER] Deleted user id: {}", id);
     }
 
-    // ─── FR-10: Đổi mật khẩu ──────────────────────────────────────────────────
+    // ─── FR-10: Người dùng tự đổi mật khẩu ───────────────────────────────────
 
     @Override
     @Transactional
@@ -105,24 +106,30 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        // Kiểm tra mật khẩu hiện tại có đúng không
-        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword()))
             throw new BadRequestException("Current password is incorrect");
-        }
 
-        // Kiểm tra mật khẩu mới và xác nhận có khớp không
-        if (!request.getNewPassword().equals(request.getConfirmPassword())) {
+        if (!request.getNewPassword().equals(request.getConfirmPassword()))
             throw new BadRequestException("New password and confirm password do not match");
-        }
 
-        // Không cho đặt mật khẩu mới trùng mật khẩu cũ
-        if (passwordEncoder.matches(request.getNewPassword(), user.getPassword())) {
+        if (passwordEncoder.matches(request.getNewPassword(), user.getPassword()))
             throw new BadRequestException("New password must be different from current password");
-        }
 
-        // Mã hoá và lưu mật khẩu mới
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
-        log.info("[USER] Password changed for user: '{}'", username);
+        log.info("[USER] Password changed for: '{}'", username);
+    }
+
+    // ─── FR-10: Admin reset mật khẩu hộ ──────────────────────────────────────
+
+    @Override
+    @Transactional
+    public void resetPassword(Long userId, ResetPasswordRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
+        log.info("[USER] Admin reset password for user id: {}", userId);
     }
 }

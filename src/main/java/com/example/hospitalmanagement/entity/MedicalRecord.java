@@ -37,22 +37,22 @@ public class MedicalRecord {
     private User patient;
 
     @Column(name = "file_name", nullable = false)
-    private String fileName;        // Tên file gốc
+    private String fileName;
 
     @Column(name = "file_url", nullable = false, length = 1000)
-    private String fileUrl;         // URL từ Cloudinary
+    private String fileUrl;
 
     @Column(name = "public_id")
-    private String publicId;        // Cloudinary public_id (dùng để xóa file)
+    private String publicId;
 
     @Column(name = "file_type", length = 50)
-    private String fileType;        // image/pdf/etc
+    private String fileType;
 
     @Column(length = 500)
-    private String diagnosis;       // Chuẩn đoán
+    private String diagnosis;
 
     @Column(length = 1000)
-    private String description;     // Mô tả thêm
+    private String description;
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

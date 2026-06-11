@@ -2,6 +2,7 @@ package com.example.hospitalmanagement.service;
 
 import com.example.hospitalmanagement.dto.request.ChangePasswordRequest;
 import com.example.hospitalmanagement.dto.request.CreateUserRequest;
+import com.example.hospitalmanagement.dto.request.ResetPasswordRequest;
 import com.example.hospitalmanagement.dto.request.UpdateUserRequest;
 import com.example.hospitalmanagement.dto.response.UserResponse;
 import com.example.hospitalmanagement.entity.User;
@@ -14,6 +15,9 @@ public interface UserService {
     UserResponse updateUser(Long id, UpdateUserRequest request);
     void deleteUser(Long id);
 
-    // FR-10
+    // FR-10: Đổi mật khẩu (người dùng tự đổi)
     void changePassword(String username, ChangePasswordRequest request);
+
+    // FR-10: Admin reset mật khẩu hộ user
+    void resetPassword(Long userId, ResetPasswordRequest request);
 }

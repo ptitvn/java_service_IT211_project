@@ -36,10 +36,10 @@ public class Appointment {
     private LocalDateTime appointmentTime;
 
     @Column(length = 500)
-    private String reason;      // Lý do khám
+    private String reason;
 
     @Column(length = 500)
-    private String notes;       // Ghi chú của bác sĩ khi duyệt/từ chối
+    private String notes;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

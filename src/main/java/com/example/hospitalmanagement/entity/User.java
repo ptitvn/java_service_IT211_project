@@ -64,7 +64,7 @@ public class User implements UserDetails {
         updatedAt = LocalDateTime.now();
     }
 
-    // ============ UserDetails methods ============
+    //UserDetails methods
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -83,7 +83,7 @@ public class User implements UserDetails {
     @Override
     public boolean isEnabled() { return status == UserStatus.ACTIVE; }
 
-    // ============ Enums ============
+    // Enums
 
     public enum Role {
         ADMIN, DOCTOR, PATIENT

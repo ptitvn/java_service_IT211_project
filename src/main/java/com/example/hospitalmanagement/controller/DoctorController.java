@@ -18,10 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
-/**
- * FR-08: Phê duyệt / Từ chối lịch khám
- * FR-09: Tải lên hồ sơ bệnh án
- */
+
 @RestController
 @RequestMapping("/api/v1/doctor")
 @RequiredArgsConstructor
@@ -30,8 +27,7 @@ public class DoctorController {
     private final AppointmentService appointmentService;
     private final MedicalRecordService medicalRecordService;
 
-    // ─── FR-08: Xem lịch khám ─────────────────────────────────────────────────
-
+    //  FR-08: Xem lịch khám
     @GetMapping("/appointments")
     public ResponseEntity<ApiResponse<Page<AppointmentResponse>>> getAppointments(
             @RequestParam(required = false) Appointment.AppointmentStatus status,
@@ -41,12 +37,7 @@ public class DoctorController {
                 appointmentService.getAllAppointments(status, page, size)));
     }
 
-    // ─── FR-08: Phê duyệt / Từ chối ──────────────────────────────────────────
-
-    /**
-     * PUT /api/v1/doctor/appointments/{id}/status
-     * Body: { "status": "APPROVED" | "REJECTED", "notes": "..." }
-     */
+    //  FR-08: Phê duyệt / Từ chối
     @PutMapping("/appointments/{id}/status")
     public ResponseEntity<ApiResponse<AppointmentResponse>> updateStatus(
             @PathVariable Long id,
@@ -57,17 +48,7 @@ public class DoctorController {
                 appointmentService.updateAppointmentStatus(id, authentication.getName(), request)));
     }
 
-    // ─── FR-09: Tải lên hồ sơ bệnh án ────────────────────────────────────────
-
-    /**
-     * POST /api/v1/doctor/records/upload
-     * Content-Type: multipart/form-data
-     * Form fields:
-     *   - file: file cần upload (JPG/PNG/PDF, max 10MB)
-     *   - appointmentId: ID lịch khám
-     *   - diagnosis: Chuẩn đoán (tuỳ chọn)
-     *   - description: Mô tả (tuỳ chọn)
-     */
+    // FR-09: Tải lên hồ sơ bệnh án
     @PostMapping(value = "/records/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<MedicalRecordResponse>> uploadRecord(
             @RequestParam("file") MultipartFile file,
@@ -82,11 +63,7 @@ public class DoctorController {
         return ResponseEntity.ok(ApiResponse.success("Medical record uploaded successfully", response));
     }
 
-    // ─── Xem hồ sơ bệnh án đã tải lên ────────────────────────────────────────
-
-    /**
-     * GET /api/v1/doctor/records
-     */
+    //  Xem hồ sơ bệnh án đã tải lên
     @GetMapping("/records")
     public ResponseEntity<ApiResponse<List<MedicalRecordResponse>>> getMyRecords(
             Authentication authentication) {

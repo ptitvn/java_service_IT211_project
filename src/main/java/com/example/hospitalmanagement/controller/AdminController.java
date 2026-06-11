@@ -17,7 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-
+import com.example.hospitalmanagement.dto.request.ResetPasswordRequest;
 @RestController
 @RequestMapping("/api/v1/admin")
 @RequiredArgsConstructor
@@ -88,5 +88,14 @@ public class AdminController {
         AppointmentResponse response = appointmentService.updateAppointmentStatus(
                 id, authentication.getName(), request);
         return ResponseEntity.ok(ApiResponse.success("Cập nhật trạng thái cuộc hẹn thành công", response));
+    }
+
+    @PostMapping("/users/{id}/reset-password")
+    public ResponseEntity<ApiResponse<Void>> resetPassword(
+            @PathVariable Long id,
+            @Valid @RequestBody ResetPasswordRequest request) {
+        userService.resetPassword(id, request);
+        return ResponseEntity.ok(ApiResponse.success(
+                "Password reset successfully for user id: " + id));
     }
 }
