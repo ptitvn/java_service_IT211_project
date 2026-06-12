@@ -51,7 +51,6 @@ class AuthServiceTest {
     }
 
     // Test 1: Login thành công
-
     @Test
     @DisplayName("Test 1 - Login với đúng username/password trả về token")
     void login_validCredentials_returnsAuthResponse() {
@@ -83,8 +82,7 @@ class AuthServiceTest {
         verify(authenticationManager, times(1)).authenticate(any());
     }
 
-    //  Test 2: Login sai mật khẩu
-
+    // Test 2: Login sai mật khẩu
     @Test
     @DisplayName("Test 2 - Login sai mật khẩu ném BadCredentialsException")
     void login_wrongPassword_throwsBadCredentialsException() {
@@ -102,7 +100,7 @@ class AuthServiceTest {
                 .hasMessage("Bad credentials");
     }
 
-    //  Test 3: Register thành công
+    // Test 3: Register thành công
     @Test
     @DisplayName("Test 3 - Register bệnh nhân mới thành công")
     void register_newUser_returnsAuthResponse() {
@@ -137,47 +135,45 @@ class AuthServiceTest {
         verify(userRepository, times(1)).save(any());
     }
 
-    //  Test 4: Register trùng username
-
+    // Test 4: Register trùng username
     @Test
     @DisplayName("Test 4 - Register trùng username ném ConflictException")
     void register_duplicateUsername_throwsConflictException() {
         // Arrange
         RegisterRequest request = new RegisterRequest();
-        request.setUsername("patient01");
+        request.setUsername("patient05");
         request.setPassword("123456");
-        request.setEmail("other@gmail.com");
-        request.setFullName("Other");
+        request.setEmail("other2@gmail.com");
+        request.setFullName("Other2");
 
-        when(userRepository.existsByUsername("patient01")).thenReturn(true);
+        when(userRepository.existsByUsername("patient05")).thenReturn(true);
 
         // Act & Assert
         assertThatThrownBy(() -> authService.register(request))
                 .isInstanceOf(ConflictException.class)
-                .hasMessageContaining("already exists");
+                .hasMessageContaining("Username 'patient05' đã tồn tại"); // Đã sửa từ "already exists" thành Tiếng Việt
 
         verify(userRepository, never()).save(any());
     }
 
-    //  Test 5: Register trùng email
-
+    // Test 5: Register trùng email
     @Test
     @DisplayName("Test 5 - Register trùng email ném ConflictException")
     void register_duplicateEmail_throwsConflictException() {
         // Arrange
         RegisterRequest request = new RegisterRequest();
-        request.setUsername("newuser");
+        request.setUsername("newuser1"); // Khớp chính xác tên username
         request.setPassword("123456");
-        request.setEmail("patient01@gmail.com");
+        request.setEmail("patient05@gmail.com");
         request.setFullName("New User");
 
-        when(userRepository.existsByUsername("newuser")).thenReturn(false);
-        when(userRepository.existsByEmail("patient01@gmail.com")).thenReturn(true);
+        when(userRepository.existsByUsername("newuser1")).thenReturn(false); // Sửa từ "newuser" thành "newuser1" để tránh lỗi Strict stubbing mismatch
+        when(userRepository.existsByEmail("patient05@gmail.com")).thenReturn(true);
 
         // Act & Assert
         assertThatThrownBy(() -> authService.register(request))
                 .isInstanceOf(ConflictException.class)
-                .hasMessageContaining("already exists");
+                .hasMessageContaining("đã tồn tại"); // Kiểm tra chứa cụm từ phù hợp với thông báo lỗi tiếng Việt
 
         verify(userRepository, never()).save(any());
     }
