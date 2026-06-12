@@ -50,14 +50,14 @@ public class UserServiceImpl implements UserService {
                 .build();
 
         User saved = userRepository.save(user);
-        log.info("[USER] Created user: '{}' role {}", saved.getUsername(), saved.getRole());
+        log.info("[USER] Đã tạo người dùng: '{}' role {}", saved.getUsername(), saved.getRole());
         return UserResponse.fromEntity(saved);
     }
 
     @Override
     public UserResponse getUserById(Long id) {
         return UserResponse.fromEntity(userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id)));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng với id: " + id)));
     }
 
     @Override
@@ -73,11 +73,11 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserResponse updateUser(Long id, UpdateUserRequest request) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng với id: " + id));
 
         if (request.getEmail() != null && !request.getEmail().equals(user.getEmail())) {
             if (userRepository.existsByEmail(request.getEmail()))
-                throw new ConflictException("Email '" + request.getEmail() + "' already exists");
+                throw new ConflictException("Email '" + request.getEmail() + "' đã tồn tại");
             user.setEmail(request.getEmail());
         }
         if (request.getFullName() != null) user.setFullName(request.getFullName());
@@ -91,48 +91,46 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void deleteUser(Long id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng với id: " + id));
         if (user.getRole() == User.Role.ADMIN)
-            throw new BadRequestException("Cannot delete admin account");
+            throw new BadRequestException("Không thể xóa tài khoản quản trị");
 
 //        userRepository.deleteById(id);
         user.setStatus(User.UserStatus.INACTIVE);
         userRepository.save(user);
-        log.info("[USER] Deleted user id: {}", id);
+        log.info("[USER] ID người dùng đã xóa: {}", id);
     }
 
     // FR-10: Người dùng tự đổi mật khẩu
-
     @Override
     @Transactional
     public void changePassword(String username, ChangePasswordRequest request) {
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng"));
 
         if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword()))
-            throw new BadRequestException("Current password is incorrect");
+            throw new BadRequestException("Mật khẩu hiện tại không đúng");
 
         if (!request.getNewPassword().equals(request.getConfirmPassword()))
-            throw new BadRequestException("New password and confirm password do not match");
+            throw new BadRequestException("Mật khẩu mới và xác nhận mật khẩu không khớp");
 
         if (passwordEncoder.matches(request.getNewPassword(), user.getPassword()))
-            throw new BadRequestException("New password must be different from current password");
+            throw new BadRequestException("Mật khẩu mới phải khác với mật khẩu hiện tại");
 
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
-        log.info("[USER] Password changed for: '{}'", username);
+        log.info("[USER] Password đã được đổi cho: '{}'", username);
     }
 
     //  FR-10: Admin reset mật khẩu hộ
-
     @Override
     @Transactional
     public void resetPassword(Long userId, ResetPasswordRequest request) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng với id: " + userId));
 
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
-        log.info("[USER] Admin reset password for user id: {}", userId);
+        log.info("[USER] Quản trị viên đặt lại mật khẩu cho ID người dùng: {}", userId);
     }
 }

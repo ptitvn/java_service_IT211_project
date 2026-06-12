@@ -57,7 +57,7 @@ public class AuthServiceImpl implements AuthService {
         );
 
         User user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng"));
 
         // Thu hồi toàn bộ refresh token cũ của user này trước khi cấp mới
         refreshTokenRepository.revokeAllUserTokens(user);
@@ -65,7 +65,7 @@ public class AuthServiceImpl implements AuthService {
         String accessToken = jwtService.generateAccessToken(user);
         String refreshToken = createAndSaveRefreshToken(user);
 
-        log.info("[AUTH] User '{}' logged in successfully with role {}", user.getUsername(), user.getRole());
+        log.info("[AUTH] User '{}' đăng nhập thành công với vai trò {}", user.getUsername(), user.getRole());
 
         return buildAuthResponse(accessToken, refreshToken, user);
     }
@@ -76,16 +76,16 @@ public class AuthServiceImpl implements AuthService {
     public AuthResponse register(RegisterRequest request) {
         // Kiểm tra trùng username/email
         if (userRepository.existsByUsername(request.getUsername())) {
-            throw new ConflictException("Username '" + request.getUsername() + "' already exists");
+            throw new ConflictException("Username '" + request.getUsername() + "' đã tồn tại");
         }
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new ConflictException("Email '" + request.getEmail() + "' already exists");
+            throw new ConflictException("Email '" + request.getEmail() + "' đã tồn tại");
         }
 
         // Tạo User mới với Role PATIENT
         User user = User.builder()
                 .username(request.getUsername())
-                .password(passwordEncoder.encode(request.getPassword()))  // BCrypt strength 10
+                .password(passwordEncoder.encode(request.getPassword()))
                 .email(request.getEmail())
                 .fullName(request.getFullName())
                 .phone(request.getPhone())
@@ -94,7 +94,7 @@ public class AuthServiceImpl implements AuthService {
                 .build();
 
         userRepository.save(user);
-        log.info("[AUTH] New PATIENT registered: '{}'", user.getUsername());
+        log.info("[AUTH] Bệnh nhân mới đã đăng ký: '{}'", user.getUsername());
 
         String accessToken = jwtService.generateAccessToken(user);
         String refreshToken = createAndSaveRefreshToken(user);

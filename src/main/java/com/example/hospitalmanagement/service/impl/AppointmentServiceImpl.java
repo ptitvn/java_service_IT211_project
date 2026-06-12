@@ -71,7 +71,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Transactional(readOnly = true)
     public Page<AppointmentResponse> getMyAppointments(String username, int page, int size) {
         User patient = userRepository.findByUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException("Patient not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy bệnh nhân"));
 
         PageRequest pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
 
@@ -131,7 +131,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                                                            Appointment.AppointmentStatus status, int page, int size) {
 
         User doctor = userRepository.findByUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException("Doctor not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy bác sĩ"));
 
         PageRequest pageable = PageRequest.of(page, size, Sort.by("appointmentTime").ascending());
 

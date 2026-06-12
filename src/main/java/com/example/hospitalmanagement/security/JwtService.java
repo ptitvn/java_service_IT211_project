@@ -25,7 +25,6 @@ public class JwtService {
     private long accessTokenExpiration;   // ms
 
     // Tạo AccessToken
-
     public String generateAccessToken(UserDetails userDetails) {
         Map<String, Object> extraClaims = new HashMap<>();
         extraClaims.put("role", userDetails.getAuthorities()
@@ -36,7 +35,6 @@ public class JwtService {
     }
 
     // Build token chung
-
     private String buildToken(Map<String, Object> extraClaims,
                               UserDetails userDetails,
                               long expiration) {

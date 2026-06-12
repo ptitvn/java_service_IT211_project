@@ -38,8 +38,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
             "image/jpeg", "image/png", "image/jpg", "application/pdf"
     );
 
-    // ─── FR-09: Doctor tải lên hồ sơ bệnh án ─────────────────────────────────
-
+    // FR-09: Doctor tải lên hồ sơ bệnh án
     @Override
     @Transactional
     public MedicalRecordResponse uploadRecord(String doctorUsername,
@@ -49,31 +48,31 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
                                               String description) {
         // Validate file
         if (file == null || file.isEmpty()) {
-            throw new BadRequestException("File is required");
+            throw new BadRequestException("Cần có tệp");
         }
         if (!ALLOWED_TYPES.contains(file.getContentType())) {
             throw new BadRequestException(
-                    "Invalid file type. Allowed: JPG, PNG, PDF. Got: " + file.getContentType());
+                    "Loại tệp không hợp lệ. Được phép: JPG, PNG, PDF. Got: " + file.getContentType());
         }
 
         // Lấy thông tin doctor
         User doctor = userRepository.findByUsername(doctorUsername)
-                .orElseThrow(() -> new ResourceNotFoundException("Doctor not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy bác sĩ"));
 
         // Lấy thông tin appointment
         Appointment appointment = appointmentRepository.findById(appointmentId)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Appointment not found with id: " + appointmentId));
+                        "Không tìm thấy cuộc hẹn với id: " + appointmentId));
 
         // Kiểm tra appointment đã APPROVED chưa
         if (appointment.getStatus() != Appointment.AppointmentStatus.APPROVED) {
             throw new BadRequestException(
-                    "Can only upload records for APPROVED appointments. Current status: "
+                    "Chỉ có thể tải lên hồ sơ cho các cuộc hẹn APPROVED. Trạng thái hiện tại: "
                             + appointment.getStatus());
         }
 
         User patient = userRepository.findById(appointment.getPatient().getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Patient not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy bệnh nhân"));
 
         // Upload lên Cloudinary
         try {
@@ -89,7 +88,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
             String fileUrl  = (String) uploadResult.get("secure_url");
             String publicId = (String) uploadResult.get("public_id");
 
-            log.info("[MEDICAL] Doctor '{}' uploaded file to Cloudinary: {}", doctorUsername, fileUrl);
+            log.info("[MEDICAL] Doctor '{}' đã tải tệp lên Cloudinary: {}", doctorUsername, fileUrl);
 
             // Lưu vào DB
             MedicalRecord record = MedicalRecord.builder()
@@ -105,23 +104,22 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
                     .build();
 
             MedicalRecord saved = medicalRecordRepository.save(record);
-            log.info("[MEDICAL] Medical record saved with id: {}", saved.getId());
+            log.info("[MEDICAL] Hồ sơ y tế đã được lưu với ID: {}", saved.getId());
 
             return MedicalRecordResponse.fromEntity(saved);
 
         } catch (IOException e) {
-            log.error("[MEDICAL] Cloudinary upload failed: {}", e.getMessage());
-            throw new RuntimeException("Failed to upload file to cloud storage: " + e.getMessage());
+            log.error("[MEDICAL] Tải lên Cloudinary thất bại: {}", e.getMessage());
+            throw new RuntimeException("Không thể tải tệp lên lưu trữ đám mây: " + e.getMessage());
         }
     }
 
-    // ─── Xem danh sách hồ sơ ──────────────────────────────────────────────────
-
+    // Xem danh sách hồ sơ
     @Override
     @Transactional(readOnly = true)
     public List<MedicalRecordResponse> getMyRecords(String username) {
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng"));
 
         List<MedicalRecord> records;
         if (user.getRole() == User.Role.PATIENT) {
